@@ -1,0 +1,19 @@
+version: "3.7"
+services:
+  bupt-net-login:
+    build: .
+    image: charlie0129/bupt-net-login
+    restart: unless-stopped
+    network_mode: host
+    # 如果你的学号和密码放置在同目录下的 .env 文件中:
+    environment:
+      - BUPT_USERNAME=${BUPT_USERNAME}
+      - BUPT_PASSWORD=${BUPT_PASSWORD}
+    #
+    # 如果你希望直接写账号密码:
+    # environment:
+    #   - BUPT_USERNAME=<学号>
+    #   - BUPT_PASSWORD=<网关密码>
+    #
+    # 可以自定义登录周期, 格式为标准 cron , 以下为默认值:
+    # command: "0 * * * *"
