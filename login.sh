@@ -41,19 +41,19 @@ login() {
 
     info "准备使用账号 $BUPT_USERNAME 进行认证, 认证地址 $redirected_auth_url"
 
+    info "获取 cookie ..."
     if ! curl "$debug_args" \
         -s -c "$cookie_file" \
-        -o /dev/null \
-        "$redirected_auth_url"; then
+        "$redirected_auth_url" >/dev/null; then
         error "获取 cookie 失败"
         return 1
     fi
 
+    info "正在认证..."
     if ! curl "$debug_args" \
         -s -b "$cookie_file" \
         -X POST --data "user=$BUPT_USERNAME&pass=$BUPT_PASSWORD" \
-        -o /dev/null \
-        "${redirected_auth_url/index/login}"; then
+        "${redirected_auth_url/index/login}" >/dev/null; then
         error "发送登录请求失败, 请检查网络连接"
         return 1
     fi
@@ -65,9 +65,8 @@ test_login() {
     curl "$debug_args" -4s "${REDIRECTION_TEST_URL}" | grep -q "Success"
 }
 
-main() {
-    redirect_resp="$(curl "$debug_args" -4s -w '%{redirect_url}' "${REDIRECTION_TEST_URL}")"
-
+check_response() {
+    redirect_resp=$1
     if [[ $redirect_resp == *Success* ]]; then
         info "您已经登录, 无需进一步操作"
         exit 0
@@ -80,10 +79,21 @@ main() {
             error "账号 $BUPT_USERNAME 认证失败"
             exit 1
         fi
+    elif [[ $redirect_resp == *http-equiv* ]]; then # 无线网，多一次调转
+        redirect_resp=$(echo "$redirect_resp " | grep -o "url=.*'")
+        redirect_resp=${redirect_resp/url=/}
+        redirect_resp=${redirect_resp/\'/}
+        REDIRECTION_TEST_URL="${redirect_resp}"
+        main
     else
         error "未知响应 $REDIRECTION_TEST_URL: \"$redirect_resp\""
         exit 1
     fi
+}
+
+main() {
+    redirect_resp="$(curl "$debug_args" -4s -w '%{redirect_url}' "${REDIRECTION_TEST_URL}")"
+    check_response "$redirect_resp"
 }
 
 main
