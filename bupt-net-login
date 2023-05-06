@@ -2,6 +2,9 @@
 
 REDIRECTION_TEST_URL="http://captive.apple.com/"
 
+# Just in case PATH is not set.
+PATH=$PATH:/bin:/usr/bin:/usr/local/bin
+
 info() {
     echo "$(date +'%Y-%m-%d %H:%M:%S') [INFO] $*"
 }
@@ -15,7 +18,7 @@ error() {
 }
 
 if [[ -z "$BUPT_USERNAME" || -z "$BUPT_PASSWORD" ]]; then
-    error "你必须设置两个环境变量用于网关认证: \$BUPT_USERNAME 为你的学号, \$BUPT_PASSWORD 为你的网关密码"
+    error "你必须设置两个环境变量用于网关认证: BUPT_USERNAME 为你的学号, BUPT_PASSWORD 为你的网关密码"
     exit 1
 fi
 
@@ -79,14 +82,14 @@ check_response() {
             error "账号 $BUPT_USERNAME 认证失败"
             exit 1
         fi
-    elif [[ $redirect_resp == *http-equiv* ]]; then # 无线网，多一次调转
+    elif [[ $redirect_resp == *http-equiv* ]]; then # 无线网，多一次跳转
         redirect_resp=$(echo "$redirect_resp " | grep -o "url=.*'")
         redirect_resp=${redirect_resp/url=/}
         redirect_resp=${redirect_resp/\'/}
         REDIRECTION_TEST_URL="${redirect_resp}"
         main
     else
-        error "未知响应 $REDIRECTION_TEST_URL: \"$redirect_resp\""
+        error "来自 $REDIRECTION_TEST_URL 的未知响应: \"$redirect_resp\""
         exit 1
     fi
 }

@@ -5,7 +5,8 @@ services:
     image: charlie0129/bupt-net-login
     restart: unless-stopped
     network_mode: host
-    # 如果你的学号和密码放置在同目录下的 .env 文件中:
+    # 如果你的学号和密码放置在同目录下的 .env 文件中：
+    #（没有 .env 的话在本目录下新建一个，内容为BUPT_USERNAME=xxx\nBUPT_PASSWORD=xxx，注意换行）
     environment:
       - BUPT_USERNAME=${BUPT_USERNAME}
       - BUPT_PASSWORD=${BUPT_PASSWORD}

@@ -12,6 +12,9 @@ if [[ "$1" != "" ]]; then
     cron="$1"
 fi
 
-echo "$cron /login.sh > /proc/1/fd/1 2>/proc/1/fd/2" | tee /var/spool/cron/crontabs/root
+echo "Initialized with the following cron job:"
+echo "-----BEGIN CRON-----"
+echo "$cron /bupt-net-login >/proc/1/fd/1 2>/proc/1/fd/2" | tee /var/spool/cron/crontabs/root
+echo "-----END CRON-----"
 
 crond -l 2 -f
