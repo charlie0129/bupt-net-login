@@ -8,13 +8,21 @@ if [[ -z "$BUPT_USERNAME" || -z "$BUPT_PASSWORD" ]]; then
 fi
 
 # Install prefix
-BIN=bupt-net-login
+if [[ -z $BIN ]]; then
+    BIN=bupt-net-login
+fi
+if [[ $BIN == "-" ]]; then
+    BIN=$(mktemp)
+    cat - >$BIN
+fi
 if [[ -z $PREFIX ]]; then
     PREFIX=/usr/local/bin
 fi
-echo "安装 $BIN 至 $PREFIX 。如果你希望更改安装位置, 请设置 PREFIX 环境变量。"
-install -D bupt-net-login $PREFIX ||
-    echo "默认安装位置 $PREFIX 需要 root 权限, 也许你需要以 root 权限运行。"
+echo "安装 $BIN 至 $PREFIX/bupt-net-login 。如果你希望更改安装位置, 请设置 PREFIX 环境变量。"
+if ! install -D $BIN $PREFIX/bupt-net-login; then
+    echo "安装失败。默认安装位置 $PREFIX 需要 root 权限, 也许你需要以 root 权限运行。"
+    exit 1
+fi
 
 cron="0 * * * *"
 # Use user-specified cron, if possible.
