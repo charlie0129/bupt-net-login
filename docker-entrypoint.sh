@@ -5,6 +5,8 @@ if [[ -z "$BUPT_USERNAME" || -z "$BUPT_PASSWORD" ]]; then
     exit 1
 fi
 
+cmd="/bupt-net-login >/proc/1/fd/1 2>/proc/1/fd/2"
+
 cron="0 * * * *"
 
 # Use user-specified cron, if possible.
@@ -12,9 +14,15 @@ if [[ "$1" != "" ]]; then
     cron="$1"
 fi
 
+echo "Login once at start up:"
+
+$cmd
+
 echo "Initialized with the following cron job:"
-echo "-----BEGIN CRON-----"
-echo "$cron /bupt-net-login >/proc/1/fd/1 2>/proc/1/fd/2" | tee /var/spool/cron/crontabs/root
-echo "-----END CRON-----"
+echo "----- BEGIN CRON -----"
+echo "$cron $cmd" | tee /var/spool/cron/crontabs/root
+echo "-----  END CRON  -----"
+
+echo "Cron job will be scheduled subsequently."
 
 crond -l 2 -f
