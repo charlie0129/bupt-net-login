@@ -153,7 +153,9 @@ BUPT_USERNAME='你的学号' BUPT_PASSWORD='你的网关密码' ./bupt-net-login
 
 > 如果确实不知道并且没安装 Git for Windows ，那就现在装一下罢，使用搜索引擎搜索安装即可。
 
-> 如果你不想用 Git for Windows 自带的 MinGW64 ， **提示：** 使用 MinGW, WSL **1** , Cygwin 等运行 bash 脚本；使用 Windows Task Scheduler （计划任务） 代替其他系统下用到的 crond ，定时检测登录态。
+> Git for Windows 是最推荐最简单的方法，接下来的教程都基于它。如果你确实不想用 Git for Windows 自带的 MinGW64 ， **提示：** 你可以使用 MinGW, WSL **1** , Cygwin 等运行 bash 脚本。不过这样就需要靠你自行解决遇到的问题了罢。
+>
+> 注意： 不要使用 WSL **2** 运行这个脚本，根据我的经验因为 WSL2 的网络为 NAT 可能会存在问题。而且 WSL2 作为 VM ，在 idle 的时候会自动关机，不能保证长期在线。（当然我也没有细究，如果你成功了，欢迎提 issue ）
 
 然后你需要打开 Git Bash ，它长这样：
 
