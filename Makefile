@@ -9,7 +9,7 @@ MAKEFLAGS += --always-make
 SHELL := /usr/bin/env bash -o errexit -o pipefail -o nounset
 
 # All supported platforms for container image distribution
-IMAGE_PLATFORMS := linux/amd64 linux/i386 linux/arm64
+IMAGE_PLATFORMS := linux/amd64 linux/386 linux/arm64 linux/arm/v7 linux/arm/v6 linux/s390x linux/ppc64le
 # Container image repositories to push to
 IMAGE_REPOS     := ghcr.io/charlie0129 docker.io/charlie0129
 # Container image name

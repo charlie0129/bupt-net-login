@@ -76,7 +76,9 @@ BUPT_USERNAME='你的学号' BUPT_PASSWORD='你的网关密码' ./bupt-net-login
 
 如果你的系统是 Linux 并有 Docker ，那么这是建议的方法。如果你不知道什么是 Docker ，那么你可以使用下一种方法。
 
-- 如果你直接使用 `docker run`：
+对于 `docker` ，你可以直接 `docker run` 或者使用 `docker compose`。
+
+- 直接使用 `docker run` 只需一行命令即可：
     ```bash
     docker run \
         --detach \
@@ -87,9 +89,13 @@ BUPT_USERNAME='你的学号' BUPT_PASSWORD='你的网关密码' ./bupt-net-login
         -e BUPT_PASSWORD="你的网关密码" \
         charlie0129/bupt-net-login
     ```
-    接下来它会在后台运行并自动检查登录态，后续你可以使用 `docker logs bupt-net-login` 查看日志。
+    参数说明：`--detach` 表示在后台运行，如果你调试时需要在前台运行，将其替换成 `-it --rm`；`--restart unless-stopped` 指定了自动重启的策略，即在意外停止后自动重开（例如重启计算机后）；`--network host` 表示使用宿主机网络协议栈，以防走 NAT 可能会有的奇怪小问题。
 
-- 如果你希望使用 `docker compose`：你可以查阅本项目下的 `docker-compose.yml` ，其中包含了足够的例子。然后使用 `docker compose up -d` 来启动。
+    接下来它会在后台运行并自动检查登录态（重启后也能继续）。后续你可以使用 `docker logs bupt-net-login` 查看日志；`docker stop bupt-net-login` 来停止运行；`docker rm bupt-net-login` 来删除容器；
+
+- 使用 `docker compose`：你可以查阅本项目下的 `docker-compose.yml` ，其中包含了足够的例子。然后使用 `docker compose up -d` 来启动。
+
+> `charlie0129/bupt-net-login` Docker 镜像支持的平台包括 `linux/amd64` ( 64 位 x86 ), `linux/386` ( 32 位 x86 ), `linux/arm64` ( 64 位 arm ), `linux/arm/v7` `linux/arm/v6` ( 32 位 arm ), `linux/s390x` (IBM z Systems), `linux/ppc64le` (IBM POWER8) 。应该正常人能接触到的绝大多数设备都可以运行吧！如果你真的有一些莫名其妙的架构的处理器那欢迎提 issue 。
 
 ### 直接运行
 
@@ -139,7 +145,7 @@ BUPT_USERNAME='你的学号' BUPT_PASSWORD='你的网关密码' ./bupt-net-login
 
 ### 自定义 cron
 
-默认每小时检查一次登录态，你可以通过附加命令行参数来自定义它，参数为标准 cron 格式 `x x x x x` ，注意时区为 UTC+0 。
+默认每小时检查一次登录态，你可以通过附加命令行参数来自定义它，参数为标准 cron 格式 `x x x x x` ，注意时区。
 
 例如你想每分钟运行一次：
 - 在 `docker run` 的时候附加参数：`docker run <省略> charlie0129/bupt-net-login "* * * * *"` 
