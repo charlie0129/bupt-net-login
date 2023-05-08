@@ -159,7 +159,7 @@ BUPT_USERNAME='你的学号' BUPT_PASSWORD='你的网关密码' ./bupt-net-login
 
 然后你需要打开 Git Bash ，它长这样：
 
-<img width="185.5" src="img/git-bash.png"></img>
+<img width="185.5" style="text-align: center;" src="img/git-bash.png"></img>
 
 <img width="500.5" src="img/git-bash-window.png"></img>
 
@@ -191,11 +191,21 @@ BUPT_USERNAME='你的学号' BUPT_PASSWORD='你的网关密码' ./bupt-net-login
 
 **注意：**
 
-- 这里的 `Program/script` 为你的 Git for Windows 中 bash 的位置，如果你修改过安装目录则对应修改，图中 `"C:\Program Files\Git\bin\bash.exe"` 为默认位置。 
-- `Add arguments` 中填入 `-c "BUPT_USERNAME='你的学号' BUPT_PASSWORD='你的网关密码' bash '<你的bupt-net-login所在位置>'"` 
+- 这里的 `Program/script` 为你的 Git for Windows 中 bash 的位置，一般情况下保持图中的值即可。如果你修改过安装目录则对应修改，图中 `"C:\Program Files\Git\bin\bash.exe"` 为默认位置。 
+- `Add arguments` 中填入 `-c "BUPT_USERNAME='你的学号' BUPT_PASSWORD='你的网关密码' bash '你的bupt-net-login所在位置' >>/tmp/bupt-net-login.log 2>&1"` 。注意这里有三处你需要替换的地方： 1. 学号 2. 网关密码 3. bupt-net-login 所在位置。 **不要漏掉任何一个标点！**
 
-例如你下载的 bupt-net-login 放在了 C 盘根目录，那么你的 `Add arguments` 可以这么填写： `-c "BUPT_USERNAME='你的学号' BUPT_PASSWORD='你的网关密码' bash '/c/bupt-net-login'"`
+例如：
+
+- 你下载的 bupt-net-login 放在了 C 盘根目录 （ `C:\bupt-net-login` 对应到 bash 里面是 `/c/bupt-net-login` ） 
+- 学号为 2019000000
+- 密码为 00000000
+
+那么你的 `Add arguments` 可以这么填写： `-c "BUPT_USERNAME='2019000000' BUPT_PASSWORD='00000000' bash '/c/bupt-net-login' >>/tmp/bupt-net-login.log 2>&1"`。 **不要漏掉任何一个标点！**
 
 <img width="632" src="img/task-conditions.png"></img>
 
-点击 OK 创建任务，你的 Windows 自动网关认证应该就配置完成了！
+其他地方按需修改即可，然后点击 OK 创建任务。
+
+你的 Windows 自动网关认证就配置完成了！他会在后台自动保持登录。
+
+> 如果你需要查看登录日志，你可以查阅 `%TEMP%\bupt-net-login.log` （默认情况下是 `C:\Users\<username>\AppData\Local\bupt-net-login.log` ）
