@@ -1,6 +1,6 @@
 # bupt-net-login
 
-这是一个用于认证北京邮电大学校园网网关的脚本（包括有线网和无线网 BUPT-portal ）。支持带参数 portal 认证、掉线重连。
+这是一个用于认证北京邮电大学校园网网关的脚本（包括有线网和无线网 BUPT-portal ）。支持带参数 portal 认证、掉线重连。支持所有能运行 bash 和 curl 的操作系统（包括 Linux, macOS, FreeBSD, Windows 等）。
 
 还在因为服务器没有 GUI 难以登录校园网而烦恼吗？还在因为偶尔网络掉线而忧虑吗？快用 bupt-net-login 吧！
 
@@ -16,22 +16,26 @@
 
 如果你用的是 Linux 且知道 Docker , 请查阅 [使用 Docker](#使用-docker) ，这是最简单的方法，一行命令即可完成。
 
+如果你用的是 Windows ，请直接阅读 [Windows 用户单独说明](#windows-用户单独说明) 。当然你也能先看一下 [准备工作](#准备工作) 。
+
 其他情况，请先阅读 [准备工作](#准备工作) 再查阅 [直接运行](#直接运行) 。
 
 ## 准备工作
 
 首先，建议在类 Unix 系统下运行该脚本（例如 Linux, macOS, FreeBSD 之类），因为：
 
-- 本脚本的全部依赖（例如 curl, bash）通常在这些操作系统下都是满足的（不像 Windows 需要装点东西），所以能直接跑；
+- 本脚本的全部依赖（例如 curl, bash）通常在这些操作系统下都是默认满足的，所以能直接跑；
 - Linux, FreeBSD 之类操作系统一般不安装 GUI ，登录网关认证没那么简单，符合本脚本解决的问题；
 
-> 那 Windows 用户怎么办？最简单的就是直接用浏览器登录得了，毕竟带 GUI 。所以接下来的所有内容都 **不** 针对 Windows 。
+> 那 Windows 用户怎么办？最简单的就是直接用浏览器登录得了，毕竟带 GUI 。
 >
-> 如果你说我就是想要在 Windows 下自动化登录怎么办呢？ 其实 Windows 也是可以跑这个脚本的，不过 Windows 默认不带 bash ，自带的假 curl 也有点问题，所以是需要小折腾的。后续会提供 Windows 的运行教程，目前还没有打算 <del>绝对不是懒</del> ，因为没需求。不过既然你都有这个想法了，说明你一定是精通命令行的！一定有能力解决遇到的问题的罢！
+> 如果你说我就是想要在 Windows 下自动化登录怎么办呢？ 其实 Windows 也是可以跑这个脚本的，不过 Windows 默认不带 bash ，自带的 [假 curl](https://github.com/PowerShell/PowerShell/pull/1901) 也有点问题，所以需要一些额外的操作。请阅读 [Windows 用户单独说明](#windows-用户单独说明) ，这里会有操作说明。
 >
-> **提示：** 使用 MinGW, WSL **1** , Cygwin 等运行 bash 脚本；使用 Windows Task Scheduler （计划任务） 代替其他系统下用到的 crond ，定时检测登录态。
+> 注意：对于 Windows 用户来说，接下来 [自动登录](#自动登录) 的章节请直接跳过（因为不针对 Windows ），[Windows 用户单独说明](#windows-用户单独说明) 有 Windows 的做法。
 
-然后您需要确保你的计算机上有 `bash` 和 `curl` 。一般来说这两个条件都已经满足（ Windows 除外）。可以直接在命令行运行 `bash --version` 和 `curl --version` 来检查，如果没有，安装即可。
+然后您需要确保你的计算机上有 `bash` 和 `curl` 。一般来说这两个条件都已经满足。可以直接在命令行运行 `bash --version` 和 `curl --version` 来检查，如果没有，安装即可。
+
+> Windows 用户记得在 Git Bash 里面跑（或者其他 bash 环境）。
 
 ## 手动登录
 
@@ -42,6 +46,8 @@
 ```bash
 BUPT_USERNAME='你的学号' BUPT_PASSWORD='你的网关密码' ./bupt-net-login
 ```
+
+> Windows 用户记得在 Git Bash 里面跑（或者其他 bash 环境）。
 
 <details>
 <summary>样例输出</summary>
@@ -138,3 +144,56 @@ BUPT_USERNAME='你的学号' BUPT_PASSWORD='你的网关密码' ./bupt-net-login
 例如你想每分钟运行一次：
 - 在 `docker run` 的时候附加参数：`docker run <省略> charlie0129/bupt-net-login "* * * * *"` 
 - 本机运行 `install.sh` 的时候附加参数：`<环境变量省略> ./install.sh "* * * * *"`。
+
+### Windows 用户单独说明
+
+众所周知， Windows 下面是没有 bash 的，自带的 curl 也是 [假 curl](https://github.com/PowerShell/PowerShell/pull/1901) ，根本没法用。所以如果想在 Windows 下跑这个脚本，那首先需要解决的是 bash 和 curl 的问题。
+
+幸好， Git for Windows 已经为我们解决了这个问题（当本质上利用了它自带的 MinGW64 ）。作为北邮学子，相信你一定用过 Git 吧！（千万别说你不知道什么是 Git）既然你用过了，那就大概率已经安装了 Git for Windows 。
+
+> 如果确实不知道并且没安装 Git for Windows ，那就现在装一下罢，使用搜索引擎搜索安装即可。
+
+> 如果你不想用 Git for Windows 自带的 MinGW64 ， **提示：** 使用 MinGW, WSL **1** , Cygwin 等运行 bash 脚本；使用 Windows Task Scheduler （计划任务） 代替其他系统下用到的 crond ，定时检测登录态。
+
+然后你需要打开 Git Bash ，它长这样：
+
+<img width="185.5" src="img/git-bash.png"></img>
+
+<img width="500.5" src="img/git-bash-window.png"></img>
+
+接下来你只需知道，README 里面读到的每一行命令都需要在 Git Bash 里面执行（别在 cmd 或者 PowerShell 里面跑，大概率跑不了）。不过你忘了也没事，会持续提醒你的（
+
+你可以先尝试一下 [手动登录](#手动登录) 看看能不能跑。
+
+如果可以跑，那就能继续配置自动登录了。（相当于 [自动登录](#自动登录) 章节的 Windows 做法）。在开始前确保你已经下载了本项目下的 bupt-net-login 文件，后面要用到（你可以把它放在一个容易找到的位置，例如 C 盘根目录）。
+
+首先你需要打开 Task Scheduler （计划任务），你可以使用 win+S 搜索。
+
+<img width="252" src="img/task-scheduler.png"></img>
+
+选择 Create Task
+
+<img width="346" src="img/create-task.png"></img>
+
+填写任务基本信息，接下来基本照着做就行，注意红框中的要点。
+
+<img width="632" src="img/task-general.png"></img>
+
+<img width="632" src="img/task-triggers.png"></img>
+
+<img width="591" src="img/task-trigger-daily.png"></img>
+
+<img width="632" src="img/task-actions.png"></img>
+
+<img width="454" src="img/task-action-run-program.png"></img>
+
+**注意：**
+
+- 这里的 `Program/script` 为你的 Git for Windows 中 bash 的位置，如果你修改过安装目录则对应修改，图中 `"C:\Program Files\Git\bin\bash.exe"` 为默认位置。 
+- `Add arguments` 中填入 `-c "BUPT_USERNAME='你的学号' BUPT_PASSWORD='你的网关密码' bash '<你的bupt-net-login所在位置>'"` 
+
+例如你下载的 bupt-net-login 放在了 C 盘根目录，那么你的 `Add arguments` 可以这么填写： `-c "BUPT_USERNAME='你的学号' BUPT_PASSWORD='你的网关密码' bash '/c/bupt-net-login'"`
+
+<img width="632" src="img/task-conditions.png"></img>
+
+点击 OK 创建任务，你的 Windows 自动网关认证应该就配置完成了！
