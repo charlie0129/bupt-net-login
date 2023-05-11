@@ -163,6 +163,10 @@ BUPT_USERNAME='你的学号' BUPT_PASSWORD='你的网关密码' ./bupt-net-login
 >
 > 注意： 不要使用 WSL **2** 运行这个脚本，根据我的经验因为 WSL2 的网络为 NAT 可能会存在问题。而且 WSL2 作为 VM ，在 idle 的时候会自动关机，不能保证长期在线。（当然我也没有细究，如果你成功了，欢迎提 issue ）
 
+从 GitHub 下载代码：
+
+<img width="420" src="img/github-download-zip.png"></img>
+
 然后你需要打开 Git Bash ，它长这样：
 
 <img width="185.5" style="text-align: center;" src="img/git-bash.png"></img>
