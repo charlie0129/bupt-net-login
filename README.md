@@ -104,20 +104,25 @@ BUPT_USERNAME='你的学号' BUPT_PASSWORD='你的网关密码' ./bupt-net-login
 注意： **在线安装** 需要你的网络能够访问 GitHub 。如果你不知道怎么做，那请使用 **离线安装** 的方法。
 
 - **离线安装:**
-    首先需要下载本项目下的 `bupt-net-login` 这个文件（无论通过哪种方式，例如 GitHub 网页下载、 git clone 等等，只要拿到这个文件就行。如果你在服务器上，那么想办法传上去就行，例如使用 scp ），并 `chmod +x bupt-net-login` 。然后运行：
+    首先需要下载本项目下的 `bupt-net-login` 这个文件（无论通过哪种方式，例如 GitHub 网页下载、 git clone 等等，只要拿到这个文件就行。如果你在服务器上，那么想办法传上去就行，例如使用 scp ），并 `chmod +x bupt-net-login` 。
+    
+    例如以当前用户安装至 `~/bin` 可以这么写：
+    ```bash
+    BUPT_USERNAME='你的学号' \
+        BUPT_PASSWORD='你的网关密码' \
+        PREFIX=$HOME/bin \
+        ./bupt-net-login install
+    ```
+
+    如果你希望全局安装（以 root 用户），你可以运行：
     ```bash
     BUPT_USERNAME='你的学号' \
         BUPT_PASSWORD='你的网关密码' \
         sudo ./bupt-net-login install
     ```
+
     安装完就可以删除 `bupt-net-login` 这个文件了。安装脚本会做这几件事：
-    - 安装 bupt-net-login 至 /usr/local/bin （这也是需要 sudo 的原因）。如果你不想用 sudo 或者想更改安装位置, 请设置 PREFIX 环境变量。例如安装至 `~/bin` 可以这么写：
-        ```bash
-        BUPT_USERNAME='你的学号' \
-            BUPT_PASSWORD='你的网关密码' \
-            PREFIX=$HOME/bin \
-            ./bupt-net-login install
-        ```
+    - 安装 bupt-net-login 至 `$PREFIX` （默认 `/usr/local/bin` ）。
     - 移除之前的 bupt-net-login cron job （如果有的话）。
     - 安装 cron job （用于定时检查登录态）至当前用户（如果你用了 sudo 那就是 root ，如果没有那就是当前用户）。
 - **在线安装:**

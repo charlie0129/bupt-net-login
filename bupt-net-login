@@ -28,11 +28,6 @@ if [[ "$1" == "install" ]]; then
         exit 1
     fi
 
-    if ! crontab -l >/dev/null; then
-        error "你没有 crontab "
-        exit 1
-    fi
-
     if [[ -z $PREFIX ]]; then
         PREFIX=/usr/local/bin
     fi
@@ -56,7 +51,8 @@ if [[ "$1" == "install" ]]; then
         exit 1
     fi
 
-    if ! install -D "$0" "$PREFIX/bupt-net-login"; then
+    mkdir -p "$PREFIX"
+    if ! cp "$0" "$PREFIX/bupt-net-login"; then
         error "安装失败"
         if [[ $EUID -ne 0 && $PREFIX == "/usr/local/bin" ]]; then
             echo "默认安装位置 /usr/local/bin 需要 root 权限, 你需要以 root 权限运行 (sudo)。"
