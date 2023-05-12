@@ -14,11 +14,11 @@
 
 ## 快速开始
 
-如果你用的是 Linux 且知道 Docker , 请查阅 [使用 Docker](#使用-docker) ，这是最简单的方法，一行命令即可完成。
+- 如果你用的是 Linux 且知道 Docker , 请查阅 [使用 Docker](#使用-docker) ，这是最简单的方法，一行命令即可完成。
 
-如果你用的是 Windows ，请直接阅读 [Windows 用户单独说明](#windows-用户单独说明) 。当然你也能先看一下 [准备工作](#准备工作) 。
+- 如果你用的是 Windows ，请跳过其他部分，直接阅读 [Windows 用户单独说明](#windows-用户单独说明) 。当然你也能先看一下 [准备工作](#准备工作) 。
 
-其他情况，请先阅读 [准备工作](#准备工作) 再查阅 [直接运行](#直接运行) 。
+- 其他情况，请先阅读 [准备工作](#准备工作) 再查阅 [直接运行](#直接运行) 。
 
 ## 准备工作
 
@@ -70,7 +70,7 @@ BUPT_USERNAME='你的学号' BUPT_PASSWORD='你的网关密码' ./bupt-net-login
 
 这是建议的用法，可以保证你的网关一直都是登录的。默认情况下会 _每小时_ 检查网关是否登录，如果没有将自动登录。
 
-有两种运行方法: Docker 和 本机。
+有两种运行方法: Docker 和 直接运行。
 
 ### 使用 Docker
 
@@ -104,37 +104,36 @@ BUPT_USERNAME='你的学号' BUPT_PASSWORD='你的网关密码' ./bupt-net-login
 注意： **在线安装** 需要你的网络能够访问 GitHub 。如果你不知道怎么做，那请使用 **离线安装** 的方法。
 
 - **离线安装:**
-    首先需要下载本项目下的 `install.sh` 和 `bupt-net-login` 两个文件（无论通过哪种方式，只要拿到这两个文件就行。如果你在服务器上，那么想办法传上去就行，例如使用 scp ），并 `chmod +x install.sh bupt-net-login` 。然后运行：
+    首先需要下载本项目下的 `bupt-net-login` 这个文件（无论通过哪种方式，例如 GitHub 网页下载、 git clone 等等，只要拿到这个文件就行。如果你在服务器上，那么想办法传上去就行，例如使用 scp ），并 `chmod +x bupt-net-login` 。然后运行：
     ```bash
     BUPT_USERNAME='你的学号' \
         BUPT_PASSWORD='你的网关密码' \
-        sudo ./install.sh
+        sudo ./bupt-net-login install
     ```
-    安装完就可以删除 `install.sh` 和 `bupt-net-login` 这两个文件了。安装脚本会做这几件事：
-    - 安装 bupt-net-login 至 /usr/local/bin （这也是需要 sudo 的原因）。如果你希望更改安装位置, 请设置 PREFIX 环境变量。例如：
+    安装完就可以删除 `bupt-net-login` 这个文件了。安装脚本会做这几件事：
+    - 安装 bupt-net-login 至 /usr/local/bin （这也是需要 sudo 的原因）。如果你不想用 sudo 或者想更改安装位置, 请设置 PREFIX 环境变量。例如安装至 `~/bin` 可以这么写：
         ```bash
         BUPT_USERNAME='你的学号' \
             BUPT_PASSWORD='你的网关密码' \
             PREFIX=$HOME/bin \
-            ./install.sh
+            ./bupt-net-login install
         ```
+    - 移除之前的 bupt-net-login cron job （如果有的话）。
     - 安装 cron job （用于定时检查登录态）至当前用户（如果你用了 sudo 那就是 root ，如果没有那就是当前用户）。
 - **在线安装:**
     ```bash
     # 如果你不能访问 GitHub , 建议跳过这部分。
-    # 你也可以通过改变下载地址, 设置 https_proxy 等方式解决。
+    # 当然，你也可以通过改变下载地址, 设置 https_proxy 等方式解决网络问题。
     DOWNLOAD_URL="https://github.com/charlie0129/bupt-net-login/raw/master"
-    # 下载安装脚本
-    curl -L ${DOWNLOAD_URL}/install.sh > install.sh
-    # 安装登录脚本
-    curl -fsSL ${DOWNLOAD_URL}/bupt-net-login | 
-        BUPT_USERNAME='你的学号' \
+    # 临时下载脚本
+    curl -fsSL ${DOWNLOAD_URL}/bupt-net-login > bupt-net-login
+    # 安装脚本
+    BUPT_USERNAME='你的学号' \
         BUPT_PASSWORD='你的网关密码' \
         PREFIX=$HOME/bin \
-        BIN=- \
-            bash install.sh
-    # 删除安装脚本
-    rm -f install.sh
+            bash ./bupt-net-login install
+    # 删除临时脚本
+    rm -f bupt-net-login
     ```
 
 接下来它会在后台运行并自动检查登录态，后续你可以使用 `cat /tmp/bupt-net-login.log` 查看日志。
@@ -149,7 +148,7 @@ BUPT_USERNAME='你的学号' BUPT_PASSWORD='你的网关密码' ./bupt-net-login
 
 例如你想每分钟运行一次：
 - 在 `docker run` 的时候附加参数：`docker run <省略> charlie0129/bupt-net-login "* * * * *"` 
-- 本机运行 `install.sh` 的时候附加参数：`<环境变量省略> ./install.sh "* * * * *"`。
+- 本机运行 `./bupt-net-login install` 的时候附加参数：`<环境变量省略> ./bupt-net-login install "* * * * *"`。
 
 ### Windows 用户单独说明
 

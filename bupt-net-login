@@ -1,7 +1,5 @@
 #!/bin/bash
 
-REDIRECTION_TEST_URL="http://captive.apple.com/"
-
 # Just in case PATH is not set.
 PATH=$PATH:/bin:/usr/bin:/usr/local/bin
 
@@ -18,8 +16,68 @@ error() {
 }
 
 if [[ -z "$BUPT_USERNAME" || -z "$BUPT_PASSWORD" ]]; then
-    error "你必须设置两个环境变量用于网关认证: BUPT_USERNAME 为你的学号, BUPT_PASSWORD 为你的网关密码"
+    error "你必须设置两个环境变量用于网关认证: BUPT_USERNAME 为你的学号, BUPT_PASSWORD 为你的网关密码。例如 \"BUPT_USERNAME=2019000000 BUPT_PASSWORD=123456 $0\""
     exit 1
+fi
+
+# Installation
+
+if [[ "$1" == "install" ]]; then
+    if ! cat "$0" 2>/dev/null | head -n1 | grep -q '#!/bin/bash'; then
+        error "请从本地运行 bupt-net-login "
+        exit 1
+    fi
+
+    if ! crontab -l >/dev/null; then
+        error "你没有 crontab "
+        exit 1
+    fi
+
+    if [[ -z $PREFIX ]]; then
+        PREFIX=/usr/local/bin
+    fi
+
+    cron="0 * * * *"
+    # Use user-specified cron, if possible.
+    if [[ "$2" != "" ]]; then
+        cron="$2"
+    fi
+
+    echo "你将要安装 bupt-net-login , 安装脚本将会做以下这些事："
+    echo "  - 复制 $0 至 $PREFIX/bupt-net-login 。如果你希望更改目标位置, 请设置 PREFIX 环境变量。"
+    if crontab -l | grep -q "/bupt-net-login"; then
+        echo "  - 移除先前安装的 bupt-net-login cron job 。其他 cron job 不受影响。"
+    fi
+    echo "  - 安装 cron job ($cron) 至当前用户 $USER 。如果你需要自定义 cron , 添加命令行参数即可, 例如 $0 install \"$cron\"。"
+
+    read -p "是否继续? (Y/n) " -n 1 -r
+    echo # (optional) move to a new line
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        exit 1
+    fi
+
+    if ! install -D "$0" "$PREFIX/bupt-net-login"; then
+        error "安装失败"
+        if [[ $EUID -ne 0 && $PREFIX == "/usr/local/bin" ]]; then
+            echo "默认安装位置 /usr/local/bin 需要 root 权限, 你需要以 root 权限运行 (sudo)。"
+            echo "如果你不想用 root 账户，请设置 PREFIX 环境变量以改变安装位置。"
+        fi
+        exit 1
+    fi
+
+    cronfull="$cron BUPT_USERNAME='$BUPT_USERNAME' BUPT_PASSWORD='$BUPT_PASSWORD' $PREFIX/bupt-net-login >>/tmp/bupt-net-login.log 2>&1"
+
+    if ! crontab -l 2>/dev/null | sed -e "\_/bupt-net-login_d" | echo -e "$(cat -)\n$cronfull\n" | crontab -; then
+        error "安装失败"
+        exit 1
+    fi
+
+    info "安装成功"
+    exit 0
+fi
+
+if [[ -z "$REDIRECTION_TEST_URL" ]]; then
+    REDIRECTION_TEST_URL="http://captive.apple.com/"
 fi
 
 debug_args=""
