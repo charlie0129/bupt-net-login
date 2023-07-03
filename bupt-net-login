@@ -143,13 +143,14 @@ check_response() {
         REDIRECTION_TEST_URL="${redirect_resp}"
         main
     else
-        error "来自 $REDIRECTION_TEST_URL 的未知响应: \"$redirect_resp\""
+        error "收到来自 $REDIRECTION_TEST_URL 的未知响应: \"$redirect_resp\" 本次认证失败, 以下为 debug 信息"
+        curl -4vsS "${REDIRECTION_TEST_URL}"
         exit 1
     fi
 }
 
 main() {
-    redirect_resp="$(curl "$debug_args" -4s -w '%{redirect_url}' "${REDIRECTION_TEST_URL}")"
+    redirect_resp="$(curl "$debug_args" -4sS -w '%{redirect_url}' "${REDIRECTION_TEST_URL}")"
     check_response "$redirect_resp"
 }
 
