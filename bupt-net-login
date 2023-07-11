@@ -99,7 +99,7 @@ login() {
     info "准备使用账号 $BUPT_USERNAME 进行认证, 认证地址 $redirected_auth_url"
 
     info "获取 cookie ..."
-    if ! curl "$debug_args" \
+    if ! curl $debug_args \
         -s -c "$cookie_file" \
         "$redirected_auth_url" >/dev/null; then
         error "获取 cookie 失败"
@@ -107,7 +107,7 @@ login() {
     fi
 
     info "正在认证..."
-    if ! curl "$debug_args" \
+    if ! curl $debug_args \
         -s -b "$cookie_file" \
         -X POST --data "user=$BUPT_USERNAME&pass=$BUPT_PASSWORD" \
         "${redirected_auth_url/index/login}" >/dev/null; then
@@ -119,7 +119,7 @@ login() {
 }
 
 test_login() {
-    curl "$debug_args" -4s "${REDIRECTION_TEST_URL}" | grep -q "Success"
+    curl $debug_args -4s "${REDIRECTION_TEST_URL}" | grep -q "Success"
 }
 
 check_response() {
@@ -150,7 +150,7 @@ check_response() {
 }
 
 main() {
-    redirect_resp="$(curl "$debug_args" -4sS -w '%{redirect_url}' "${REDIRECTION_TEST_URL}")"
+    redirect_resp="$(curl $debug_args -4sS -w '%{redirect_url}' "${REDIRECTION_TEST_URL}")"
     check_response "$redirect_resp"
 }
 
