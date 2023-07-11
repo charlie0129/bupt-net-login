@@ -220,10 +220,18 @@ BUPT_USERNAME='你的学号' BUPT_PASSWORD='你的网关密码' ./bupt-net-login
 
 那么你的 `Add arguments` 可以这么填写： `-c "BUPT_USERNAME='2019000000' BUPT_PASSWORD='00000000' bash '/c/bupt-net-login' >>/tmp/bupt-net-login.log 2>&1"`。 **不要漏掉任何一个标点！**
 
+其他地方按需修改即可，然后点击 OK 创建任务。
+
 <img width="632" src="img/task-conditions.png"></img>
 
-其他地方按需修改即可，然后点击 OK 创建任务。
+选择刚刚创建的任务，选择 Run 即可测试。
+
+<img width="280" src="img/task-test-run.png"></img>
+
+为了测试是否成功，你可以查看日志 `%TEMP%\bupt-net-login.log` 。快捷查看方法： Win+R 输入 `notepad %TEMP%\bupt-net-login.log` 即可用记事本打开。看到登录成功的提示说明操作完成。
 
 你的 Windows 自动网关认证就配置完成了！他会在后台自动保持登录。
 
-> 如果你需要查看登录日志，你可以查阅 `%TEMP%\bupt-net-login.log` （默认情况下是 `C:\Users\<username>\AppData\Local\bupt-net-login.log` ）
+> [有用户](https://github.com/charlie0129/bupt-net-login/issues/2) 报告称执行计划任务时会报 2147943726 错误，如果你遇到了类似的问题，可以尝试在 `General` 选项卡中勾选 `Do not store password` 。
+> <img width="632" src="img/task-fix-1.png"></img>
+> Acknowledgement: [@kahakaha](https://github.com/kahakaha)
