@@ -20,36 +20,21 @@
 
 - 如果你用的是 Linux 且知道 Docker , 请查阅 [使用 Docker](#使用-docker) ，这是最简单的方法，一行命令即可完成。
 
-- 如果你用的是 Windows ，请跳过其他部分，直接阅读 [Windows 用户单独说明](#windows-用户单独说明) 。当然你也能先看一下 [准备工作](#准备工作) 。
+- 如果你用的是 Windows ，请跳过其他部分，直接阅读 [Windows 用户单独说明](#windows-用户单独说明) 。
 
-- 其他情况，请先阅读 [准备工作](#准备工作) 再查阅 [直接运行](#直接运行) 。
-
-## 准备工作
-
-首先，建议在类 Unix 系统下运行该脚本（例如 Linux, macOS, FreeBSD 之类），因为：
-
-- 本脚本的全部依赖（例如 curl, bash）通常在这些操作系统下都是默认满足的，所以能直接跑；
-- Linux, FreeBSD 之类操作系统一般不安装 GUI ，登录网关认证没那么简单，符合本脚本解决的问题；
-
-> 那 Windows 用户怎么办？最简单的就是直接用浏览器登录得了，毕竟带 GUI 。
->
-> 如果你说我就是想要在 Windows 下自动化登录怎么办呢？ 其实 Windows 也是可以跑这个脚本的，不过 Windows 默认不带 bash ，自带的 [假 curl](https://github.com/PowerShell/PowerShell/pull/1901) 也有点问题，所以需要一些额外的操作。请阅读 [Windows 用户单独说明](#windows-用户单独说明) ，这里会有操作说明。
->
-> 注意：对于 Windows 用户来说，接下来 [自动登录](#自动登录) 的章节请直接跳过（因为不针对 Windows ），[Windows 用户单独说明](#windows-用户单独说明) 有 Windows 的做法。
-
-然后您需要确保你的计算机上有 `bash` 和 `curl` 。一般来说这两个条件都已经满足。可以直接在命令行运行 `bash --version` 和 `curl --version` 来检查，如果没有，安装即可。
-
-> Windows 用户记得在 Git Bash 里面跑（或者其他 bash 环境）。
+- 其他情况（macOS, FreeBSD, Linux 非 Docker 用户等），请查阅 [cronjob](#cronjob) 。
 
 ## 手动登录
 
-立即登录网关，只登录一次，一般用于测试。
+立即登录网关，不自动检查掉线。
 
-首先下载该项目下的 `bupt-net-login` 文件并 `chmod +x bupt-net-login` 。
+首先需要下载本项目下的 `bupt-net-login` 这个文件（无论通过哪种方式，例如 GitHub 网页下载、 git clone 等等，只要拿到这个文件就行。如果你在服务器上，那么想办法传上去就行，例如使用 scp ），并 `chmod +x bupt-net-login` 。
 
 ```bash
-BUPT_USERNAME='你的学号' BUPT_PASSWORD='你的网关密码' ./bupt-net-login
+./bupt-net-login
 ```
+
+脚本会询问你的学号和网关密码用于登录（如果需要）。
 
 > Windows 用户记得在 Git Bash 里面跑（或者其他 bash 环境）。
 
@@ -74,11 +59,11 @@ BUPT_USERNAME='你的学号' BUPT_PASSWORD='你的网关密码' ./bupt-net-login
 
 这是建议的用法，可以保证你的网关一直都是登录的。默认情况下会 _每 5 分钟_ 检查网关是否登录，如果没有将自动登录。
 
-有两种运行方法: Docker 和 直接运行。
+有两种运行方法: Docker 和 cronjob 。
 
-### 使用 Docker
+### Docker
 
-如果你的系统是 Linux 并有 Docker ，那么这是建议的方法。如果你不知道什么是 Docker ，那么你可以使用下一种方法。
+如果你的系统是 Linux 并有 Docker ，那么这是建议的方法。如果你不知道什么是 Docker ，那么你可以使用 cronjob （下一节）。
 
 对于 `docker` ，你可以直接 `docker run` 或者使用 `docker compose`。
 
@@ -101,49 +86,27 @@ BUPT_USERNAME='你的学号' BUPT_PASSWORD='你的网关密码' ./bupt-net-login
 
 > `charlie0129/bupt-net-login` Docker 镜像支持的平台包括 `linux/amd64` ( 64 位 x86 ), `linux/386` ( 32 位 x86 ), `linux/arm64` ( 64 位 arm ), `linux/arm/v7` `linux/arm/v6` ( 32 位 arm ), `linux/s390x` (IBM z Systems), `linux/ppc64le` (IBM POWER8) 。应该正常人能接触到的绝大多数设备都可以运行吧！如果你真的有一些莫名其妙的架构的处理器那欢迎提 issue 。
 
-### 直接运行
+### cronjob
 
-如果你本机没有 Docker ，或者你觉得运行 Docker 对你来说太重或太困难（例如 macOS 和 FreeBSD ），或者你不知道什么是 Docker 。那么本机直接运行都是建议的方法，你可以选择 **在线安装** 或者 **离线安装** 。
+如果你本机没有 Docker ，或者你觉得运行 Docker 对你来说太重或太困难（例如 macOS 和 FreeBSD ），或者你不知道什么是 Docker ，那么 cronjob 都是建议的方法。
 
-注意： **在线安装** 需要你的网络能够访问 GitHub 。如果你不知道怎么做，那请使用 **离线安装** 的方法。
+首先需要下载本项目下的 `bupt-net-login` 这个文件（无论通过哪种方式，例如 GitHub 网页下载、 git clone 等等，只要拿到这个文件就行。如果你在服务器上，那么想办法传上去就行，例如使用 scp ），并 `chmod +x bupt-net-login` 。
 
-- **离线安装:**
-    首先需要下载本项目下的 `bupt-net-login` 这个文件（无论通过哪种方式，例如 GitHub 网页下载、 git clone 等等，只要拿到这个文件就行。如果你在服务器上，那么想办法传上去就行，例如使用 scp ），并 `chmod +x bupt-net-login` 。
-    
-    例如以当前用户安装至 `~/bin` 可以这么写：
-    ```bash
-    BUPT_USERNAME='你的学号' \
-        BUPT_PASSWORD='你的网关密码' \
-        PREFIX=$HOME/bin \
-        ./bupt-net-login install
-    ```
+如果你希望全局安装（以 root 用户），你可以运行：
+```bash
+sudo ./bupt-net-login install
+```
 
-    如果你希望全局安装（以 root 用户），你可以运行：
-    ```bash
-    BUPT_USERNAME='你的学号' \
-        BUPT_PASSWORD='你的网关密码' \
-        sudo ./bupt-net-login install
-    ```
+如果想以当前用户安装至 `~/bin` 可以这么写：
+```bash
+PREFIX=$HOME/bin \
+    ./bupt-net-login install
+```
 
-    安装完就可以删除 `bupt-net-login` 这个文件了。安装脚本会做这几件事：
-    - 安装 bupt-net-login 至 `$PREFIX` （默认 `/usr/local/bin` ）。
-    - 移除之前的 bupt-net-login cron job （如果有的话）。
-    - 安装 cron job （用于定时检查登录态）至当前用户（如果你用了 sudo 那就是 root ，如果没有那就是当前用户）。
-- **在线安装:**
-    ```bash
-    # 如果你不能访问 GitHub , 建议跳过这部分。
-    # 当然，你也可以通过改变下载地址, 设置 https_proxy 等方式解决网络问题。
-    DOWNLOAD_URL="https://github.com/charlie0129/bupt-net-login/raw/master"
-    # 临时下载脚本
-    curl -fsSL ${DOWNLOAD_URL}/bupt-net-login > bupt-net-login
-    # 安装脚本
-    BUPT_USERNAME='你的学号' \
-        BUPT_PASSWORD='你的网关密码' \
-        PREFIX=$HOME/bin \
-            bash ./bupt-net-login install
-    # 删除临时脚本
-    rm -f bupt-net-login
-    ```
+安装完就可以删除 `bupt-net-login` 这个文件了。安装脚本会做这几件事：
+- 安装 bupt-net-login 至 `$PREFIX` （默认 `/usr/local/bin` ）。
+- 移除之前的 bupt-net-login cron job （如果有的话）。
+- 安装 cron job （用于定时检查登录态）至当前用户（如果你用了 sudo 那就是 root ，如果没有那就是当前用户）。
 
 接下来它会在后台运行并自动检查登录态，后续你可以使用 `cat /tmp/bupt-net-login.log` 查看日志。
 
@@ -157,7 +120,11 @@ BUPT_USERNAME='你的学号' BUPT_PASSWORD='你的网关密码' ./bupt-net-login
 
 例如你想每分钟运行一次：
 - 在 `docker run` 的时候附加参数：`docker run <省略> charlie0129/bupt-net-login "* * * * *"` 
-- 本机运行 `./bupt-net-login install` 的时候附加参数：`<环境变量省略> ./bupt-net-login install "* * * * *"`。
+- 本机运行 `./bupt-net-login install` 的时候附加参数：`./bupt-net-login install "* * * * *"`。
+
+### 指定学号和密码
+
+默认脚本会以交互式的方式询问你的学号和密码，如果你想无人值守操作，可以通过环境变量 `BUPT_USERNAME` 和 `BUPT_PASSWORD` 来指定，这时脚本就不会询问密码了。
 
 ### Windows 用户单独说明
 

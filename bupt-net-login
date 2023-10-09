@@ -15,8 +15,9 @@ error() {
     echo "$(date +'%Y-%m-%d %H:%M:%S') [ERRO] $*"
 }
 
-if [[ -z "$BUPT_USERNAME" || -z "$BUPT_PASSWORD" ]]; then
-    error "你必须设置两个环境变量用于网关认证: BUPT_USERNAME 为你的学号, BUPT_PASSWORD 为你的网关密码。例如 \"BUPT_USERNAME=2019000000 BUPT_PASSWORD=123456 $0\""
+# must have curl installed
+if ! which curl >/dev/null; then
+    error "请先安装 curl"
     exit 1
 fi
 
@@ -45,9 +46,10 @@ if [[ "$1" == "install" ]]; then
     fi
     echo "  - 安装 cron job ($cron) 至当前用户 $USER 。如果你需要自定义 cron , 添加命令行参数即可, 例如 $0 install \"$cron\"。"
 
-    read -p "是否继续? (Y/n) " -n 1 -r
-    echo # (optional) move to a new line
+    read -p "是否继续? (y/n) " -n 1 -r
+    echo
     if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        echo "你选择了取消安装"
         exit 1
     fi
 
@@ -59,6 +61,13 @@ if [[ "$1" == "install" ]]; then
             echo "如果你不想用 root 账户，请设置 PREFIX 环境变量以改变安装位置。"
         fi
         exit 1
+    fi
+
+    if [[ -z "$BUPT_USERNAME" || -z "$BUPT_PASSWORD" ]]; then
+        warn "你没有设置 BUPT_USERNAME 和 BUPT_PASSWORD 环境变量（例如 \"BUPT_USERNAME=2019000000 BUPT_PASSWORD=123456 $0\"）, 请手动输入学号和网关密码，你的信息将用于网关认证。"
+        read -p '学号: ' BUPT_USERNAME
+        read -s -p '网关密码: ' BUPT_PASSWORD
+        echo
     fi
 
     cronfull="$cron BUPT_USERNAME='$BUPT_USERNAME' BUPT_PASSWORD='$BUPT_PASSWORD' $PREFIX/bupt-net-login >>/tmp/bupt-net-login.log 2>&1"
@@ -129,6 +138,12 @@ check_response() {
         exit 0
     elif [[ $redirect_resp == *10.3.8* ]]; then
         info "您未登录, 准备认证..."
+        if [[ -z "$BUPT_USERNAME" || -z "$BUPT_PASSWORD" ]]; then
+            warn "你没有设置 BUPT_USERNAME 和 BUPT_PASSWORD 环境变量（例如 \"BUPT_USERNAME=2019000000 BUPT_PASSWORD=123456 $0\"）, 请手动输入学号和网关密码，你的信息将用于网关认证。"
+            read -p '学号: ' BUPT_USERNAME
+            read -s -p '网关密码: ' BUPT_PASSWORD
+            echo
+        fi
         if login "$redirect_resp"; then
             info "账号 $BUPT_USERNAME 认证成功"
             exit 0
