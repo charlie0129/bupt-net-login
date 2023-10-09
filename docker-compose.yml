@@ -17,4 +17,4 @@ services:
     #   - BUPT_PASSWORD=<网关密码>
     #
     # 可以自定义登录周期, 格式为标准 cron , 以下为默认值:
-    # command: "0 * * * *"
+    # command: "0-59/5 * * * *"

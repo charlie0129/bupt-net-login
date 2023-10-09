@@ -7,7 +7,7 @@ fi
 
 cmd="/bupt-net-login >/proc/1/fd/1 2>/proc/1/fd/2"
 
-cron="0 * * * *"
+cron="0-59/5 * * * *"
 
 # Use user-specified cron, if possible.
 if [[ "$1" != "" ]]; then

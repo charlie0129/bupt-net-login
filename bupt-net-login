@@ -32,7 +32,7 @@ if [[ "$1" == "install" ]]; then
         PREFIX=/usr/local/bin
     fi
 
-    cron="0 * * * *"
+    cron="0-59/5 * * * *"
     # Use user-specified cron, if possible.
     if [[ "$2" != "" ]]; then
         cron="$2"

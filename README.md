@@ -72,7 +72,7 @@ BUPT_USERNAME='你的学号' BUPT_PASSWORD='你的网关密码' ./bupt-net-login
 
 ## 自动登录
 
-这是建议的用法，可以保证你的网关一直都是登录的。默认情况下会 _每小时_ 检查网关是否登录，如果没有将自动登录。
+这是建议的用法，可以保证你的网关一直都是登录的。默认情况下会 _每 5 分钟_ 检查网关是否登录，如果没有将自动登录。
 
 有两种运行方法: Docker 和 直接运行。
 
@@ -153,7 +153,7 @@ BUPT_USERNAME='你的学号' BUPT_PASSWORD='你的网关密码' ./bupt-net-login
 
 ### 自定义 cron
 
-默认每小时检查一次登录态，你可以通过附加命令行参数来自定义它，参数为标准 cron 格式 `x x x x x` ，注意时区。
+默认每 5 分钟检查一次登录态，你可以通过附加命令行参数来自定义它，参数为标准 cron 格式 `x x x x x` ，注意时区。
 
 例如你想每分钟运行一次：
 - 在 `docker run` 的时候附加参数：`docker run <省略> charlie0129/bupt-net-login "* * * * *"` 
@@ -202,6 +202,8 @@ BUPT_USERNAME='你的学号' BUPT_PASSWORD='你的网关密码' ./bupt-net-login
 <img width="632" src="img/task-triggers.png"></img>
 
 <img width="591" src="img/task-trigger-daily.png"></img>
+
+你可以自行调整重复间隔（即每过多久检查一次登录态）。
 
 <img width="632" src="img/task-actions.png"></img>
 
