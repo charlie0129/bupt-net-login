@@ -21,6 +21,36 @@ if ! which curl >/dev/null; then
     exit 1
 fi
 
+ask_cred() {
+    # already set username and password in environment variables, skip
+    if [[ -n "$BUPT_USERNAME" && -n "$BUPT_PASSWORD" ]]; then
+        return
+    fi
+
+    # try to read saved username and password from file
+    if [[ -f $HOME/.bupt-net-login ]]; then
+        source $HOME/.bupt-net-login
+    fi
+
+    # if still not set, ask user to input
+    if [[ -z "$BUPT_USERNAME" || -z "$BUPT_PASSWORD" ]]; then
+        warn "你没有设置 BUPT_USERNAME 和 BUPT_PASSWORD 环境变量（例如 \"BUPT_USERNAME=2019000000 BUPT_PASSWORD=123456 $0\"），也没有保存密码。"
+        echo "请手动输入学号和网关密码，你的信息将用于网关认证。"
+        read -p '你的学号: ' BUPT_USERNAME
+        read -s -p '网关密码: ' BUPT_PASSWORD
+        echo
+
+        read -p "是否保存用户名密码以方便手动登录（自动登录不需要）？注意，你的凭据将被明文存储。(y/n) " -n 1 -r
+        echo
+        if [[ $REPLY =~ ^[Yy]$ ]]; then
+            echo "BUPT_USERNAME='$BUPT_USERNAME'" >$HOME/.bupt-net-login
+            echo "BUPT_PASSWORD='$BUPT_PASSWORD'" >>$HOME/.bupt-net-login
+            chmod 600 $HOME/.bupt-net-login
+            info "已保存你的凭据至 $HOME/.bupt-net-login ，如果你想删除凭据，请直接删除该文件。"
+        fi
+    fi
+}
+
 # Installation
 
 if [[ "$1" == "install" ]]; then
@@ -63,12 +93,7 @@ if [[ "$1" == "install" ]]; then
         exit 1
     fi
 
-    if [[ -z "$BUPT_USERNAME" || -z "$BUPT_PASSWORD" ]]; then
-        warn "你没有设置 BUPT_USERNAME 和 BUPT_PASSWORD 环境变量（例如 \"BUPT_USERNAME=2019000000 BUPT_PASSWORD=123456 $0\"）, 请手动输入学号和网关密码，你的信息将用于网关认证。"
-        read -p '学号: ' BUPT_USERNAME
-        read -s -p '网关密码: ' BUPT_PASSWORD
-        echo
-    fi
+    ask_cred
 
     cronfull="$cron BUPT_USERNAME='$BUPT_USERNAME' BUPT_PASSWORD='$BUPT_PASSWORD' $PREFIX/bupt-net-login >>/tmp/bupt-net-login.log 2>&1"
 
@@ -138,12 +163,7 @@ check_response() {
         exit 0
     elif [[ $redirect_resp == *10.3.8* ]]; then
         info "您未登录, 准备认证..."
-        if [[ -z "$BUPT_USERNAME" || -z "$BUPT_PASSWORD" ]]; then
-            warn "你没有设置 BUPT_USERNAME 和 BUPT_PASSWORD 环境变量（例如 \"BUPT_USERNAME=2019000000 BUPT_PASSWORD=123456 $0\"）, 请手动输入学号和网关密码，你的信息将用于网关认证。"
-            read -p '学号: ' BUPT_USERNAME
-            read -s -p '网关密码: ' BUPT_PASSWORD
-            echo
-        fi
+        ask_cred
         if login "$redirect_resp"; then
             info "账号 $BUPT_USERNAME 认证成功"
             exit 0
