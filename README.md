@@ -18,11 +18,9 @@
 
 如果你希望自动登录：
 
-- 如果你用的是 Linux 且知道 Docker , 请查阅 [使用 Docker](#使用-docker) ，这是最简单的方法，一行命令即可完成。
-
 - 如果你用的是 Windows ，请跳过其他部分，直接阅读 [Windows 用户单独说明](#windows-用户单独说明) 。
-
-- 其他情况（macOS, FreeBSD, Linux 非 Docker 用户等），请查阅 [cronjob](#cronjob) 。
+- 如果你用 Linux, macOS, FreeBSD 等，请查阅 [cronjob](#cronjob) 。
+- 如果你用 Linux 且想用 Docker , 请查阅 [Docker](#docker) 。
 
 ## 手动登录
 
@@ -103,12 +101,9 @@ PREFIX=$HOME/bin \
     ./bupt-net-login install
 ```
 
-安装完就可以删除 `bupt-net-login` 这个文件了。安装脚本会做这几件事：
-- 安装 bupt-net-login 至 `$PREFIX` （默认 `/usr/local/bin` ）。
-- 移除之前的 bupt-net-login cron job （如果有的话）。
-- 安装 cron job （用于定时检查登录态）至当前用户（如果你用了 sudo 那就是 root ，如果没有那就是当前用户）。
+安装完就可以删除 `bupt-net-login` 这个文件了。
 
-接下来它会在后台运行并自动检查登录态，后续你可以使用 `cat /tmp/bupt-net-login.log` 查看日志。
+接下来它会在后台运行并自动检查登录态，后续你可以使用 `cat /tmp/bupt-net-login.log` 查看日志。你也可以直接使用 `bupt-net-login` 来手动运行一次。
 
 如果你需要卸载：使用 `crontab -e` 来删除带有 `bupt-net-login` 字样的行即可。（如果你安装时用了 sudo ，那现在也需要使用 `sudo crontab -e` ）
 
