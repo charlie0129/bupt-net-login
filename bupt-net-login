@@ -146,7 +146,9 @@ login() {
     info "正在认证..."
     if ! curl $debug_args \
         -s -b "$cookie_file" \
-        -X POST --data "user=$BUPT_USERNAME&pass=$BUPT_PASSWORD" \
+        -X POST \
+        --data-urlencode "user=$BUPT_USERNAME" \
+        --data-urlencode "pass=$BUPT_PASSWORD" \
         "${redirected_auth_url/index/login}" >/dev/null; then
         error "发送登录请求失败, 请检查网络连接"
         return 1
