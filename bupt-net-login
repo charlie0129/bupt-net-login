@@ -36,8 +36,8 @@ ask_cred() {
     if [[ -z "$BUPT_USERNAME" || -z "$BUPT_PASSWORD" ]]; then
         warn "你没有设置 BUPT_USERNAME 和 BUPT_PASSWORD 环境变量（例如 \"BUPT_USERNAME=2019000000 BUPT_PASSWORD=123456 $0\"），也没有保存密码。"
         echo "请手动输入学号和网关密码，你的信息将用于网关认证。"
-        read -p '你的学号: ' BUPT_USERNAME
-        read -s -p '网关密码: ' BUPT_PASSWORD
+        read -p '你的学号 Username: ' BUPT_USERNAME
+        read -s -p '网关密码 Password: ' BUPT_PASSWORD
         echo
 
         read -p "是否保存用户名密码以方便手动登录（自动登录不需要）？注意，你的凭据将被明文存储。(y/n) " -n 1 -r
@@ -84,7 +84,7 @@ if [[ "$1" == "install" ]]; then
     fi
 
     mkdir -p "$PREFIX"
-    if ! cp -f "$0" "$PREFIX/bupt-net-login"; then
+    if [[ "$0" != "$PREFIX/bupt-net-login" ]] && ! install "$0" "$PREFIX/bupt-net-login"; then
         error "安装失败"
         if [[ $EUID -ne 0 && $PREFIX == "/usr/local/bin" ]]; then
             echo "默认安装位置 /usr/local/bin 需要 root 权限, 你需要以 root 权限运行 (sudo)。"
@@ -92,9 +92,6 @@ if [[ "$1" == "install" ]]; then
         fi
         exit 1
     fi
-
-    # fix permissions
-    chmod +x "$PREFIX/bupt-net-login"
 
     ask_cred
 
