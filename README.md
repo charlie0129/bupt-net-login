@@ -34,6 +34,7 @@
 
 脚本会询问你的学号和网关密码用于登录（如果需要），你也可以保存用户名和密码（脚本会询问），方便下次登录。
 
+> [!NOTE]
 > Windows 用户记得在 Git Bash 里面跑（或者其他 bash 环境）。
 
 <details>
@@ -53,17 +54,48 @@
 ```
 </details>
 
-有线网用户：对于确实只需要临时登录一下，而且 scp 这个文件都嫌麻烦/有问题的，考虑一键式登录（最简单，也最不可靠的办法）：`curl -L -X POST --data 'user=<学号>&pass=<网关密码>' http://10.3.8.211/login`。
+科研有线网用户：对于确实只需要临时登录一下，而且 scp 这个文件都嫌麻烦/有问题的，考虑一键式登录（随时可能失效）：`curl -L -X POST --data 'user=<学号>&pass=<网关密码>' http://10.3.8.211/login`。
 
 ## 自动登录
 
 这是建议的用法，可以保证你的网关一直都是登录的。默认情况下会 _每 5 分钟_ 检查网关是否登录，如果没有将自动登录。
 
-有两种运行方法: Docker 和 cronjob 。
+有两种运行方法（二选一）: 
+
+- crobjob: 你的系统是任何类 Unix (Linux, macOS, FreeBSD等)；
+- Docker: 你的系统是 Linux 并有 Docker ，能拉到 DockerHub 或 GHCR 的镜像。
+
+> [!NOTE]
+> 鉴于国内网络状况（ GFW 在约 2024 年 6 月阻断了境内对 DockerHub 的访问，如果你没有科学上网的姿势，镜像大概率是拉不下来的），建议使用 cronjob 。
+
+> Windows 用户直接阅读 [Windows 用户单独说明](#windows-用户单独说明)
+
+### cronjob
+
+首先需要下载本项目下的 `bupt-net-login` 这个文件（无论通过哪种方式，例如 GitHub 网页下载、 git clone 等等，只要拿到这个文件就行。如果你在服务器上，那么想办法传上去就行，例如使用 scp ），并 `chmod +x bupt-net-login` 。
+
+如果你希望全局安装（以 root 用户），你可以运行，安装脚本将会在安装前告诉你它会做的事：
+```bash
+sudo ./bupt-net-login install
+```
+
+如果想以当前用户安装至 `~/bin` 可以这么写，安装脚本将会在安装前告诉你它会做的事：
+```bash
+PREFIX=$HOME/bin \
+    ./bupt-net-login install
+```
+
+因为已经安装至系统 PATH 了，安装完就可以删除 `bupt-net-login` 这个文件了： `rm `bupt-net-login`。
+
+接下来它会在后台运行并自动检查登录态，后续你可以使用 `cat /tmp/bupt-net-login.log` 查看日志。你也可以直接使用 `bupt-net-login` 来手动运行一次。
+
+如果你需要卸载：
+
+- `bupt-net-login uninstall` 删除当前用户的自动登录（如果有）
+- `sudo bupt-net-login uninstall` 删除 root 用户的自动登录（如果有）
+- `rm $(which bupt-net-login)` 删除 bupt-net-login 自身
 
 ### Docker
-
-如果你的系统是 Linux 并有 Docker ，那么这是建议的方法。如果你不知道什么是 Docker ，那么你可以使用 cronjob （下一节）。
 
 对于 `docker` ，你可以直接 `docker run` 或者使用 `docker compose`。
 
@@ -84,36 +116,13 @@
 
 - 使用 `docker compose`：你可以查阅本项目下的 `docker-compose.yml` ，其中包含了足够的例子。然后使用 `docker compose up -d` 来启动。
 
-> `charlie0129/bupt-net-login` Docker 镜像支持的平台包括 `linux/amd64` ( 64 位 x86 ), `linux/386` ( 32 位 x86 ), `linux/arm64` ( 64 位 arm ), `linux/arm/v7` `linux/arm/v6` ( 32 位 arm ), `linux/s390x` (IBM z Systems), `linux/ppc64le` (IBM POWER8) 。应该正常人能接触到的绝大多数设备都可以运行吧！如果你真的有一些莫名其妙的架构的处理器那欢迎提 issue 。
-
-### cronjob
-
-如果你本机没有 Docker ，或者你觉得运行 Docker 对你来说太重或太困难（例如 macOS 和 FreeBSD ），或者你不知道什么是 Docker ，那么 cronjob 都是建议的方法。
-
-首先需要下载本项目下的 `bupt-net-login` 这个文件（无论通过哪种方式，例如 GitHub 网页下载、 git clone 等等，只要拿到这个文件就行。如果你在服务器上，那么想办法传上去就行，例如使用 scp ），并 `chmod +x bupt-net-login` 。
-
-如果你希望全局安装（以 root 用户），你可以运行：
-```bash
-sudo ./bupt-net-login install
-```
-
-如果想以当前用户安装至 `~/bin` 可以这么写：
-```bash
-PREFIX=$HOME/bin \
-    ./bupt-net-login install
-```
-
-安装完就可以删除 `bupt-net-login` 这个文件了。
-
-接下来它会在后台运行并自动检查登录态，后续你可以使用 `cat /tmp/bupt-net-login.log` 查看日志。你也可以直接使用 `bupt-net-login` 来手动运行一次。
-
-如果你需要卸载：使用 `crontab -e` 来删除带有 `bupt-net-login` 字样的行即可。（如果你安装时用了 sudo ，那现在也需要使用 `sudo crontab -e` ）
+> `charlie0129/bupt-net-login` Docker 镜像支持的平台包括 `linux/amd64` ( 64 位 x86 ), `linux/386` ( 32 位 x86 ), `linux/arm64` ( 64 位 arm ), `linux/arm/v7` `linux/arm/v6` ( 32 位 arm ), `linux/s390x` (IBM z Systems), `linux/ppc64le` (IBM POWER8) 。
 
 ## 高级
 
 ### 自定义 cron
 
-默认每 5 分钟检查一次登录态，你可以通过附加命令行参数来自定义它，参数为标准 cron 格式 `x x x x x` ，注意时区。
+默认每 5 分钟检查一次登录态，你可以通过附加命令行参数来自定义它，参数为标准 cron 格式 `x x x x x` ，注意时区（默认 UTC+0 ）。
 
 例如你想每分钟运行一次：
 - 在 `docker run` 的时候附加参数：`docker run <省略> charlie0129/bupt-net-login "* * * * *"` 
@@ -131,9 +140,7 @@ PREFIX=$HOME/bin \
 
 > 如果确实不知道并且没安装 Git for Windows ，那就现在装一下罢，使用搜索引擎搜索安装即可。
 
-> Git for Windows 是最推荐最简单的方法，接下来的教程都基于它。如果你确实不想用 Git for Windows 自带的 MinGW64 ， **提示：** 你可以使用 MinGW, WSL **1** , Cygwin 等运行 bash 脚本。不过这样就需要靠你自行解决遇到的问题了罢。
->
-> 注意： 不要使用 WSL **2** 运行这个脚本，根据我的经验因为 WSL2 的网络为 NAT 可能会存在问题。而且 WSL2 作为 VM ，在 idle 的时候会自动关机，不能保证长期在线。（当然我也没有细究，如果你成功了，欢迎提 issue ）
+> Git for Windows 是最推荐最简单的方法，接下来的教程都基于它。如果你确实不想用 Git for Windows 自带的 MinGW64 ， **提示：** 你可以使用 MinGW, WSL, Cygwin 等运行 bash 脚本。不过这样就需要靠你自行解决遇到的问题了罢。
 
 从 GitHub 下载代码：
 

@@ -1,25 +1,34 @@
 #!/bin/bash
 
 # Just in case PATH is not set.
-PATH=$PATH:/bin:/usr/bin:/usr/local/bin
+PATH=$PATH:/bin:/usr/bin:/usr/local/bin:/usr/local/sbin:/usr/sbin
+
+NC='\033[0m'
+CYAN='\033[0;36m'
+YELLOW='\033[0;33m'
+GREEN='\033[0;32m'
+RED='\033[0;31m'
+
+datestr() {
+    date +'%Y-%m-%d %H:%M:%S'
+}
 
 info() {
-    echo "$(date +'%Y-%m-%d %H:%M:%S') [INFO] $*"
+    echo -e "${CYAN}INFO${NC}[$(datestr)] $*"
 }
 
 warn() {
-    echo "$(date +'%Y-%m-%d %H:%M:%S') [WARN] $*"
+    echo -e "${YELLOW}WARN${NC}[$(datestr)] $*"
 }
 
 error() {
-    echo "$(date +'%Y-%m-%d %H:%M:%S') [ERRO] $*"
+    echo -e "${RED}ERRO${NC}[$(datestr)] $*"
 }
 
-# must have curl installed
-if ! which curl >/dev/null; then
-    error "请先安装 curl"
+fatal() {
+    echo -e "${RED}FATA${NC}[$(datestr)] $*"
     exit 1
-fi
+}
 
 ask_cred() {
     # already set username and password in environment variables, skip
@@ -40,7 +49,7 @@ ask_cred() {
         read -s -p '网关密码 Password: ' BUPT_PASSWORD
         echo
 
-        read -p "是否保存用户名密码以方便手动登录（自动登录不需要）？注意，你的凭据将被明文存储。(y/n) " -n 1 -r
+        read -p "是否保存用户名密码以方便下次手动登录？注意，你的凭据将被明文存储。(y/n) " -n 1 -r
         echo
         if [[ $REPLY =~ ^[Yy]$ ]]; then
             echo "BUPT_USERNAME='$BUPT_USERNAME'" >$HOME/.bupt-net-login
@@ -51,19 +60,23 @@ ask_cred() {
     fi
 }
 
-# Installation
+# default cron
+cron="0-59/5 * * * *"
 
+# Installation
 if [[ "$1" == "install" ]]; then
+    if ! which crontab >/dev/null; then
+        fatal "你的系统没有 crontab ？"
+    fi
+
     if ! cat "$0" 2>/dev/null | head -n1 | grep -q '#!/bin/bash'; then
-        error "请从本地运行 bupt-net-login "
-        exit 1
+        fatal "请从本地运行 bupt-net-login "
     fi
 
     if [[ -z $PREFIX ]]; then
         PREFIX=/usr/local/bin
     fi
 
-    cron="0-59/5 * * * *"
     # Use user-specified cron, if possible.
     if [[ "$2" != "" ]]; then
         cron="$2"
@@ -81,18 +94,16 @@ if [[ "$1" == "install" ]]; then
     read -p "是否继续? (y/n) " -n 1 -r
     echo
     if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-        echo "你选择了取消安装"
-        exit 1
+        fatal "你选择了取消安装"
     fi
 
     mkdir -p "$PREFIX"
     if [[ "$0" != "$PREFIX/bupt-net-login" ]] && ! install "$0" "$PREFIX/bupt-net-login"; then
-        error "安装失败"
         if [[ $EUID -ne 0 && $PREFIX == "/usr/local/bin" ]]; then
             echo "默认安装位置 /usr/local/bin 需要 root 权限, 你需要以 root 权限运行 (sudo)。"
             echo "如果你不想用 root 账户，请设置 PREFIX 环境变量以改变安装位置。"
         fi
-        exit 1
+        fatal "安装失败"
     fi
 
     ask_cred
@@ -100,12 +111,41 @@ if [[ "$1" == "install" ]]; then
     cronfull="$cron BUPT_USERNAME='$BUPT_USERNAME' BUPT_PASSWORD='$BUPT_PASSWORD' $PREFIX/bupt-net-login >>/tmp/bupt-net-login.log 2>&1"
 
     if ! crontab -l 2>/dev/null | sed -e "\_/bupt-net-login_d" | echo -e "$(cat -)\n$cronfull\n" | crontab -; then
-        error "安装失败"
-        exit 1
+        fatal "安装失败"
     fi
 
     info "安装成功"
     exit 0
+elif [[ "$1" == "uninstall" ]]; then
+    if crontab -l 2>/dev/null | grep -q /bupt-net-login; then
+        info "正在删除当前用户 ($USER) 的 bupt-net-login cronjob "
+        if ! crontab -l 2>/dev/null | sed -e "\_/bupt-net-login_d" | crontab -; then
+            fatal "删除 cronjob 失败"
+        fi
+    else
+        warn "当前用户 ($USER) 未安装 bupt-net-login cronjob"
+    fi
+
+    if [[ -f "$HOME/.bupt-net-login" ]]; then
+        info "正在删除保存的用户名密码"
+        rm -f $HOME/.bupt-net-login
+    fi
+
+    echo "任何后台服务已清除，如果你需要删除 bupt-net-login 自身，运行 \"rm $(which bupt-net-login)\""
+    exit 0
+elif [[ -n "$1" ]]; then
+    echo "bupt-net-login - 北京邮电大学校园网认证脚本"
+    echo "Usage: $0 [install|uninstall]"
+    echo "                   - 不加参数即执行网关认证"
+    echo "    install [cron] - 安装认证 cronjob, 定期检查登录。"
+    echo "                     cron 参数可选，默认 cron 为 \"$cron\""
+    echo "    uninstall      - 删除 cronjob 和保存的用户名密码"
+    exit 0
+fi
+
+# must have curl installed
+if ! which curl >/dev/null; then
+    fatal "请先安装 curl\n你可以根据你的包管理器选择合适的命令：\n  - sudo apt install curl\n  - sudo yum install curl\n  - sudo pacman -S curl\n  - brew install curl"
 fi
 
 if [[ -z "$REDIRECTION_TEST_URL" ]]; then
@@ -172,8 +212,7 @@ check_response() {
             info "账号 $BUPT_USERNAME 认证成功"
             exit 0
         else
-            error "账号 $BUPT_USERNAME 认证失败"
-            exit 1
+            fatal "账号 $BUPT_USERNAME 认证失败"
         fi
     elif [[ $redirect_resp == *http-equiv* ]]; then # 无线网，多一次跳转
         redirect_resp=$(echo "$redirect_resp " | grep -o "url=.*'")
