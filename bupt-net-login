@@ -86,7 +86,7 @@ if [[ "$1" == "install" ]]; then
     if [[ "$0" != "$PREFIX/bupt-net-login" ]]; then
         echo "  - 安装 $0 至 $PREFIX/bupt-net-login 。如果你希望更改目标位置, 请设置 PREFIX 环境变量。"
     fi
-    if crontab -l | grep -q "/bupt-net-login"; then
+    if crontab -l 2>/dev/null | grep -q "/bupt-net-login"; then
         echo "  - 移除先前安装的 bupt-net-login cron job 。其他 cron job 不受影响。"
     fi
     echo "  - 安装 cron job ($cron) 至当前用户 $USER 。如果你需要自定义 cron , 添加命令行参数即可, 例如 $0 install \"$cron\"。"
