@@ -1,5 +1,23 @@
 #!/bin/bash
 
+# bupt-net-login is a authenticator for BUPT (Beijing University
+# of Posts and Telecommunications) campus network.
+# Copyright (C) 2024 Charlie Chiang
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+
 # Just in case PATH is not set.
 PATH=$PATH:/bin:/usr/bin:/usr/local/bin:/usr/local/sbin:/usr/sbin
 
@@ -49,7 +67,7 @@ ask_cred() {
         read -s -p '网关密码 Password: ' BUPT_PASSWORD
         echo
 
-        read -p "是否保存用户名密码以方便下次手动登录？注意，你的凭据将被明文存储。(y/n) " -n 1 -r
+        read -p "是否保存用户名密码以方便下次手动登录？注意，你的凭据将被明文存储。(y/N) " -n 1 -r
         echo
         if [[ $REPLY =~ ^[Yy]$ ]]; then
             echo "BUPT_USERNAME='$BUPT_USERNAME'" >$HOME/.bupt-net-login
@@ -134,7 +152,7 @@ elif [[ "$1" == "uninstall" ]]; then
     echo "任何后台服务已清除，如果你需要删除 bupt-net-login 自身，运行 \"rm $(which bupt-net-login)\""
     exit 0
 elif [[ -n "$1" ]]; then
-    echo "bupt-net-login - 北京邮电大学校园网认证脚本"
+    echo "bupt-net-login     - 北京邮电大学校园网认证脚本"
     echo "Usage: $0 [install|uninstall]"
     echo "                   - 不加参数即执行网关认证"
     echo "    install [cron] - 安装认证 cronjob, 定期检查登录。"
